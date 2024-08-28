@@ -3,13 +3,30 @@
 <html>
         <head>
                 <title>projectRPS</title>
+
                 <meta charset="UTF-8">
+                
+                <link rel="stylesheet" href="style.css">
         </head>
         
         <body>
-                <div id="game_start">
+                <div id="div_start">
                         <h1>projectRPS</h1>
-                        <button id="game_start">게임 시작</button>
+                        <button id="btn_start">게임 시작</button>
                 </div>
+
+                <div id="div_pair" style="display: none;">
+                        <div id="div_pair_finding">
+                                <p id="p_opponent" style="display: none;">상대가 게임을 떠났습니다.</p>
+                                <p>상대 찾는 중...</p>
+                        </div>
+
+                        <div id="div_pair_new" style="display: none;">
+                                <p>Here Comes a New Challenger!</p>
+                                <button id="btn_pair">준비 완료</button>
+                        </div>
+                </div>
+
+                <script src="script.js"></script>
         </body>
 </html>
