@@ -1,3 +1,5 @@
+const VERSION = "0.0.1"
+
 const SERVER_ADDR = 'ws://localhost';
 const SERVER_PORT = 8080;
 
