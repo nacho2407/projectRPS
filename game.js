@@ -6,7 +6,13 @@ const SERVER_PORT = 8080;
 const NETWORK_TIMEOUT = 60000;
 
 const btn_pair = document.getElementById('btn_pair');
+const btn_selecting1 = document.getElementById('btn_selecting1');
+const btn_selecting2 = document.getElementById('btn_selecting2');
+const btn_selecting3 = document.getElementById('btn_selecting3');
+
 const div_pair = document.getElementById('div_pair');
+const div_selecting = document.getElementById('div_selecting');
+
 const p_pair = document.getElementById('p_pair');
 
 let ws;
@@ -60,13 +66,31 @@ function connect_server()
 
                 try {
                     const json_message = JSON.parse(message);
-                    
-                    // JSON 파일인 경우
-                    // 카드 덱 받아서 처리하기
+            
+                    switch(json_message.type) {
+                        case 'selecting':
+                                if(json_message.cur_turn == 1) {
+                                        div_pair.style.display = 'none';
+                                        div_selecting.style.display = 'block';
+                                }
+
+                                p_selecting.innerHTML = '턴 ' + json_message.cur_turn + '/' + json_message.max_turn;
+
+                                btn_selecting1.textContent = json_message.cards[0].suit + ' ' + json_message.cards[0].number;
+                                btn_selecting2.textContent = json_message.cards[1].suit + ' ' + json_message.cards[1].number;
+                                btn_selecting3.textContent = json_message.cards[2].suit + ' ' + json_message.cards[2].number;
+
+                                // 시간 제한 추가 및 버튼 이벤트 추가/삭제
+
+                                break;
+                    }
                 } catch (e) {
-                    if (message === 'paired') {
-                        p_pair.innerHTML = 'Here Comes a New Challenger!';
-                        btn_pair.style.display = 'block';
+                    switch(message) {
+                        case 'paired':
+                                p_pair.innerHTML = 'Here Comes a New Challenger!';
+                                btn_pair.style.display = 'block';
+
+                                break;
                     }
                 }
             };
