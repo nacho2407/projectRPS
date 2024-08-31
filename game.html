@@ -19,13 +19,27 @@
 
                         <div id="div_selecting_cards">
                                 <p id="p_selecting_timer">남은 시간: 0초</p>
-                                
-                                <button id="btn_selecting1" style="height: 50px;">로딩중...</button>
-                                <button id="btn_selecting2" style="height: 50px;">로딩중...</button>
-                                <button id="btn_selecting3" style="height: 50px;">로딩중...</button>
                         </div>
 
                         <p id="p_selecting_cards">나의 선택: { }</p>
+                </div>
+
+                <div id="div_game" style="display: none;">
+                        <span id="span_game_playground" style="display: inline-block; width: 300px; border-left: solid; text-align: center;">
+                                <p id="p_game_opponent">상대 선택중...</p>
+                                
+                                <p id="p_game_timer">남은 시간: 0초</p>
+                                
+                                <p>내 선택</p>
+                        </span>
+
+                        <span>
+                                <p id="p_game_turn">로딩중...</p>
+                                
+                                <p id="p_game_win">승: 0</p>
+
+                                <p id="p_game_lose">패: 0</p>
+                        </span>
                 </div>
 
                 <script src="game.js"></script>
