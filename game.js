@@ -5,6 +5,7 @@ const SERVER_PORT = 8080;
 
 const NETWORK_TIMEOUT = 60000;
 
+// game 관련 사용하지 않는 요소들 정리하기
 const btn_pair = document.getElementById('btn_pair');
 
 const div_pair = document.getElementById('div_pair');
@@ -70,8 +71,9 @@ function connect_server()
                                                 for(let i = 0; i < json_message.selecting_pool.length; i++) {
                                                         const btn = document.createElement('button');
                                                         btn.textContent = json_message.selecting_pool[i].suit + ' ' + json_message.selecting_pool[i].number;
-                                                        btn.style.width = '50px';
-                                                        btn.style.height = '50px';
+                                                        btn.style.width = '75px';
+                                                        btn.style.height = '75px';
+                                                        btn.style.marginRight = '5px';
                                                         btn.id = 'btn_selecting' + i;
         
                                                         btn.addEventListener("click", () => {
@@ -84,7 +86,7 @@ function connect_server()
                 
                                                                 if(json_message.cur_turn >= json_message.max_turn) {
                                                                         p_selecting.innerHTML = '상대의 선택을 기다리는 중...';
-                                                                        p_selecting_cards.innerHTML = '나의 선택: { ' + json_message.cards.map(card => `${card.suit} ${card.number}`).join(', ') + ', ' + json_message.selecting_pool[num].suit + ' ' + json_message.selecting_pool[num].number + ' }';
+                                                                        p_selecting_cards.innerHTML = '나의 선택: { ' + json_message.cards.map(card => `${card.suit} ${card.number}`).join(', ') + ', ' + json_message.selecting_pool[i].suit + ' ' + json_message.selecting_pool[i].number + ' }';
                                                                         div_selecting_cards.style.display = 'none';
                                                                 } else {
                                                                         p_selecting.innerHTML = '로딩중...';
@@ -133,8 +135,9 @@ function connect_server()
                                                 for(let i = 0; i < json_message.cards.length; i++) {
                                                         const btn = document.createElement('button');
                                                         btn.textContent = json_message.cards[i].suit + ' ' + json_message.cards[i].number;
-                                                        btn.style.width = '50px';
-                                                        btn.style.height = '50px';
+                                                        btn.style.width = '75px';
+                                                        btn.style.height = '75px';
+                                                        btn.style.marginRight = '5px';
                                                         btn.id = 'btn_game_card' + i;
         
                                                         btn.addEventListener("click", () => {
