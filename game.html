@@ -24,22 +24,24 @@
                         <p id="p_selecting_cards">나의 선택: { }</p>
                 </div>
 
+                <!-- 레이아웃 재정비하고 디버깅하기 -->
                 <div id="div_game" style="display: none;">
-                        <span id="span_game_playground" style="display: inline-block; width: 300px; border-left: solid; text-align: center;">
-                                <p id="p_game_opponent">상대 선택중...</p>
-                                
-                                <p id="p_game_timer">남은 시간: 0초</p>
-                                
-                                <p>내 선택</p>
+                        <span id="span_game_playground" style="text-align: center;">
+                                <p id="p_game_opponent" style="display: inline;">상대 선택중...</p>
+                                <br>
+                                <p id="p_game_timer" style="display: inline;">남은 시간: 0초</p>
+                                <br>
+                                <p style="display: inline;">내 선택</p>
+                                <br>
                         </span>
 
-                        <span>
+                        <div style="border-left: solid;">
                                 <p id="p_game_turn">로딩중...</p>
-                                
-                                <p id="p_game_win">승: 0</p>
 
+                                <p id="p_game_win">승: 0</p>
+                                
                                 <p id="p_game_lose">패: 0</p>
-                        </span>
+                        <div>
                 </div>
 
                 <script src="game.js"></script>
