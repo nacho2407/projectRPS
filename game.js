@@ -29,8 +29,8 @@ let ws;
 let is_ready = false;
 
 let json_message;
-let selecting_btns = [];
 let timer;
+let selecting_btns = [];
 let game_btns = [];
 
 function connect_server()
@@ -117,10 +117,10 @@ function connect_server()
                                         let selecting_time_limit = json_message.time_limit;
                                         p_selecting_timer.innerHTML = '남은 시간: ' + selecting_time_limit + '초';
                                         timer = setInterval(() => {
-                                                if(selecting_time_limit < 0)
-                                                        selecting_btns[Math.floor(Math.random() * selecting_btns.length)].click();
-
                                                 p_selecting_timer.innerHTML = '남은 시간: ' + (--selecting_time_limit) + '초';
+
+                                                if(selecting_time_limit <= 0)
+                                                        selecting_btns[Math.floor(Math.random() * selecting_btns.length)].click();
                                         }, 1000);
 
                                         p_selecting_cards.innerHTML = '나의 선택: { ' + json_message.cards.map(card => `${card.suit} ${card.number}`).join(', ') + ' }';
@@ -128,6 +128,8 @@ function connect_server()
                                         break;
                                 case 'game':
                                         if(json_message.cur_turn == 1) {
+                                                // 게임 시작까지 대기 시간 넣기
+                                                
                                                 div_selecting.style.display = 'none';
                                                 div_game.style.display = 'block';
 
@@ -167,6 +169,8 @@ function connect_server()
                                                         const btn = document.getElementById('btn_game_card' + i);
                                                         btn.textContent = json_message.cards[i].suit + ' ' + json_message.cards[i].number;
                                                         btn.disabled = false;
+
+                                                        // 이벤트 리스너 추가
                                                 }
                                         }
 
@@ -179,12 +183,27 @@ function connect_server()
                                         let game_time_limit = json_message.time_limit;
                                         p_game_timer.innerHTML = '남은 시간: ' + game_time_limit + '초';
                                         timer = setInterval(() => {
-                                                if(game_time_limit < 0)
-                                                        game_btns[Math.floor(Math.random() * game_btns.length)].click();
-                                                // 왜 -2일 때까지 도는 거여?? 돌아버리겠네
-
                                                 p_game_timer.innerHTML = '남은 시간: ' + (--game_time_limit) + '초';
+                                                
+                                                if(game_time_limit <= 0)
+                                                        game_btns[Math.floor(Math.random() * game_btns.length)].click();
                                         }, 1000);
+
+                                        break;
+                                case 'result':
+                                        p_game_opponent.innerHTML = '상대 선택: ' + json_message.opponent.suit + ' ' + json_message.opponent.number;
+
+                                        if(json_message.result == 'win') {
+                                                p_game_timer.innerHTML = '승리';
+                                                p_game_win.innerHTML = '승: ' + json_message.win;
+                                        } else {
+                                                p_game_timer.innerHTML = '패배';
+                                                p_game_lose.innerHTML = '패: ' + json_message.lose;
+                                        }
+
+                                        timer = setTimeout(() => {
+                                                
+                                        }, 3000);
 
                                         break;
                         }
@@ -193,6 +212,10 @@ function connect_server()
                                 case 'paired':
                                         p_pair.innerHTML = 'Here Comes a New Challenger!';
                                         btn_pair.style.display = 'block';
+
+                                        break;
+                                case 'pending':
+                                        p_game_opponent.innerHTML = '상대 선택 완료';
 
                                         break;
                         }
