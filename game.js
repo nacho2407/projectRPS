@@ -5,13 +5,13 @@ const SERVER_PORT = 8080;
 
 const NETWORK_TIMEOUT = 60000;
 
-// game 관련 사용하지 않는 요소들 정리하기
 const btn_pair = document.getElementById('btn_pair');
 
 const div_pair = document.getElementById('div_pair');
 const div_selecting = document.getElementById('div_selecting');
 const div_selecting_cards = document.getElementById('div_selecting_cards');
 const div_game = document.getElementById('div_game');
+const div_game_playground = document.getElementById('div_game_playground');
 
 const p_pair = document.getElementById('p_pair');
 const p_selecting = document.getElementById('p_selecting');
@@ -19,11 +19,10 @@ const p_selecting_timer = document.getElementById('p_selecting_timer');
 const p_selecting_cards = document.getElementById('p_selecting_cards');
 const p_game_opponent = document.getElementById('p_game_opponent');
 const p_game_timer = document.getElementById('p_game_timer');
+const p_game_my = document.getElementById('p_game_my');
 const p_game_turn = document.getElementById('p_game_turn');
 const p_game_win = document.getElementById('p_game_win');
 const p_game_lose = document.getElementById('p_game_lose');
-
-const span_game_playground = document.getElementById('span_game_playground');
 
 let ws;
 
@@ -118,10 +117,10 @@ function connect_server()
                                         let selecting_time_limit = json_message.time_limit;
                                         p_selecting_timer.innerHTML = '남은 시간: ' + selecting_time_limit + '초';
                                         timer = setInterval(() => {
-                                                p_selecting_timer.innerHTML = '남은 시간: ' + (--selecting_time_limit) + '초';
-
                                                 if(selecting_time_limit < 0)
                                                         selecting_btns[Math.floor(Math.random() * selecting_btns.length)].click();
+
+                                                p_selecting_timer.innerHTML = '남은 시간: ' + (--selecting_time_limit) + '초';
                                         }, 1000);
 
                                         p_selecting_cards.innerHTML = '나의 선택: { ' + json_message.cards.map(card => `${card.suit} ${card.number}`).join(', ') + ' }';
@@ -148,8 +147,10 @@ function connect_server()
                                                                         btn.disabled = true;
                                                                 }
 
+                                                                p_game_my.innerHTML = '나의 선택: ' + json_message.cards[i].suit + ' ' + json_message.cards[i].number;
+
                                                                 game_btns.splice(game_btns.findIndex(btn => btn.id == 'btn_game_card' + i), 1);
-                                                                span_game_playground.removeChild(btn);
+                                                                div_game_playground.removeChild(btn);
         
                                                                 ws.send(JSON.stringify({
                                                                         type: 'game',
@@ -159,10 +160,9 @@ function connect_server()
         
                                                         game_btns.push(btn);
 
-                                                        span_game_playground.appendChild(btn);
+                                                        div_game_playground.appendChild(btn);
                                                 }
                                         } else {
-                                                // 아래 부분 맞는지 확인. 차라리 버튼 다 삭제하고 다시 만드는게 더 나을수도?
                                                 for(let i = 0; i < json_message.cards.length; i++) {
                                                         const btn = document.getElementById('btn_game_card' + i);
                                                         btn.textContent = json_message.cards[i].suit + ' ' + json_message.cards[i].number;
@@ -170,7 +170,6 @@ function connect_server()
                                                 }
                                         }
 
-                                        p_game_opponent.innerHTML = '상대: ' + json_message.opponent;
                                         p_game_timer.innerHTML = '남은 시간: ' + json_message.time_limit + '초';
 
                                         p_game_turn.innerHTML = '턴: ' + json_message.cur_turn + '/' + json_message.max_turn;
@@ -180,10 +179,11 @@ function connect_server()
                                         let game_time_limit = json_message.time_limit;
                                         p_game_timer.innerHTML = '남은 시간: ' + game_time_limit + '초';
                                         timer = setInterval(() => {
-                                                p_game_timer.innerHTML = '남은 시간: ' + (--game_time_limit) + '초';
-
                                                 if(game_time_limit < 0)
                                                         game_btns[Math.floor(Math.random() * game_btns.length)].click();
+                                                // 왜 -2일 때까지 도는 거여?? 돌아버리겠네
+
+                                                p_game_timer.innerHTML = '남은 시간: ' + (--game_time_limit) + '초';
                                         }, 1000);
 
                                         break;
