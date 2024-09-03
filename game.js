@@ -62,56 +62,12 @@ function connect_server()
                         json_message = JSON.parse(message);
                 
                         switch(json_message.type) {
-                                case 'selecting':
-                                        if(json_message.cur_turn == 1) {
-                                                div_pair.style.display = 'none';
-                                                div_selecting.style.display = 'block';
+                                case 'match':
+                                        p_pair.innerHTML = 'Here Comes a New Challenger!: ' + json_message.opponent;
+                                        btn_pair.style.display = 'block';
 
-                                                for(let i = 0; i < json_message.selecting_pool.length; i++) {
-                                                        const btn = document.createElement('button');
-                                                        btn.textContent = json_message.selecting_pool[i].suit + ' ' + json_message.selecting_pool[i].number;
-                                                        btn.style.width = '75px';
-                                                        btn.style.height = '75px';
-                                                        btn.style.marginRight = '5px';
-                                                        btn.id = 'btn_selecting' + i;
-        
-                                                        btn.addEventListener("click", () => {
-                                                                clearInterval(timer);
-        
-                                                                for(let i = 0; i < json_message.selecting_pool.length; i++) {
-                                                                        const btn = document.getElementById('btn_selecting' + i);
-                                                                        btn.disabled = true;
-                                                                }
-                
-                                                                if(json_message.cur_turn >= json_message.max_turn) {
-                                                                        p_selecting.innerHTML = '상대의 선택을 기다리는 중...';
-                                                                        p_selecting_cards.innerHTML = '나의 선택: { ' + json_message.cards.map(card => `${card.suit} ${card.number}`).join(', ') + ', ' + json_message.selecting_pool[i].suit + ' ' + json_message.selecting_pool[i].number + ' }';
-                                                                        div_selecting_cards.style.display = 'none';
-                                                                } else {
-                                                                        p_selecting.innerHTML = '로딩중...';
-                                                                        p_selecting_timer.innerHTML = '남은 시간: 0초';
-                                                                }
-                
-                                                                ws.send(JSON.stringify({
-                                                                        type: 'selecting',
-                                                                        card: json_message.selecting_pool[i],
-                                                                        cur_turn: json_message.cur_turn,
-                                                                        max_turn: json_message.max_turn
-                                                                }));
-                                                        });
-        
-                                                        selecting_btns.push(btn);
-
-                                                        div_selecting_cards.appendChild(btn);
-                                                }
-                                        } else {
-                                                for(let i = 0; i < json_message.selecting_pool.length; i++) {
-                                                        const btn = document.getElementById('btn_selecting' + i);
-                                                        btn.textContent = json_message.selecting_pool[i].suit + ' ' + json_message.selecting_pool[i].number;
-                                                        btn.disabled = false;
-                                                }
-                                        }
-
+                                        break;
+                                case 'pool':
                                         p_selecting.innerHTML = '개수: ' + json_message.cur_turn + '/' + json_message.max_turn;
 
                                         let selecting_time_limit = json_message.time_limit;
@@ -122,6 +78,55 @@ function connect_server()
                                                 if(selecting_time_limit <= 0)
                                                         selecting_btns[Math.floor(Math.random() * selecting_btns.length)].click();
                                         }, 1000);
+                                        
+                                        if(json_message.cur_turn == 1) {
+                                                div_pair.style.display = 'none';
+                                                div_selecting.style.display = 'block';
+
+                                                for(let i = 0; i < json_message.pool.length; i++) {
+                                                        const btn = document.createElement('button');
+                                                        btn.textContent = json_message.pool[i].suit + ' ' + json_message.pool[i].number;
+                                                        btn.style.width = '75px';
+                                                        btn.style.height = '75px';
+                                                        btn.style.marginRight = '5px';
+                                                        btn.id = 'btn_selecting' + i;
+        
+                                                        btn.addEventListener("click", () => {
+                                                                clearInterval(timer);
+        
+                                                                for(let i = 0; i < json_message.pool.length; i++) {
+                                                                        const btn = document.getElementById('btn_selecting' + i);
+                                                                        btn.disabled = true;
+                                                                }
+                
+                                                                if(json_message.cur_turn >= json_message.max_turn) {
+                                                                        p_selecting.innerHTML = '상대의 선택을 기다리는 중...';
+                                                                        p_selecting_cards.innerHTML = '나의 선택: { ' + json_message.cards.map(card => `${card.suit} ${card.number}`).join(', ') + ', ' + json_message.pool[i].suit + ' ' + json_message.pool[i].number + ' }';
+                                                                        div_selecting_cards.style.display = 'none';
+                                                                } else {
+                                                                        p_selecting.innerHTML = '로딩중...';
+                                                                        p_selecting_timer.innerHTML = '남은 시간: 0초';
+                                                                }
+                
+                                                                ws.send(JSON.stringify({
+                                                                        type: 'selecting',
+                                                                        card: json_message.pool[i],
+                                                                        cur_turn: json_message.cur_turn,
+                                                                        max_turn: json_message.max_turn
+                                                                }));
+                                                        });
+        
+                                                        selecting_btns.push(btn);
+
+                                                        div_selecting_cards.appendChild(btn);
+                                                }
+                                        } else {
+                                                for(let i = 0; i < json_message.pool.length; i++) {
+                                                        const btn = document.getElementById('btn_selecting' + i);
+                                                        btn.textContent = json_message.pool[i].suit + ' ' + json_message.pool[i].number;
+                                                        btn.disabled = false;
+                                                }
+                                        }
 
                                         p_selecting_cards.innerHTML = '나의 선택: { ' + json_message.cards.map(card => `${card.suit} ${card.number}`).join(', ') + ' }';
 
@@ -209,11 +214,6 @@ function connect_server()
                         }
                 } catch (e) {
                         switch(message) {
-                                case 'paired':
-                                        p_pair.innerHTML = 'Here Comes a New Challenger!';
-                                        btn_pair.style.display = 'block';
-
-                                        break;
                                 case 'pending':
                                         p_game_opponent.innerHTML = '상대 선택 완료';
 
