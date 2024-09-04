@@ -107,11 +107,11 @@ function connect_server()
                                 
                                 if(pool_message.cur_turn == 1) {
                                         let wait = WAITING_TIME;
-                                        p_waiting.innerHTML = '잠시 후 게임이 시작됩니다.<br>남은 시간 : ' + WAITING_TIME + '초';
+                                        p_waiting.innerHTML = '잠시 후 게임이 시작됩니다.<br><br>' + WAITING_TIME;
                                         div_pair.style.display = 'none';
                                         p_waiting.style.display = 'block';
                                         timer = setInterval(() => {
-                                                p_pair.innerHTML = '잠시 후 게임이 시작됩니다.<br>남은 시간 : ' + --wait + '초';
+                                                p_waiting.innerHTML = '잠시 후 게임이 시작됩니다.<br><br>' + (--wait);
 
                                                 if(wait <= 0) {
                                                         clearInterval(timer);
@@ -189,57 +189,36 @@ function connect_server()
 
                                 if(game_message.cur_turn == 1) {
                                         let wait = WAITING_TIME
-                                        p_waiting.innerHTML = '잠시 후 게임이 시작됩니다.<br>남은 시간: ' + wait + '초';
+                                        p_waiting.innerHTML = '잠시 후 게임이 시작됩니다.<br><br>' + wait;
                                         div_selecting.style.display = 'none';
                                         p_waiting.style.display = 'block';
                                         timer = setInterval(() => {
-                                                // 시간 제한 부분 추가
-                                                for(let i = 0; i < game_message.hand.length; i++) {
-                                                        const btn = document.createElement('button');
-                                                        btn.textContent = game_message.hand[i].suit + ' ' + game_message.hand[i].number;
-                                                        btn.style.width = '75px';
-                                                        btn.style.height = '75px';
-                                                        btn.style.marginRight = '5px';
-                                                        btn.id = 'btn_game_card' + i;
-        
-                                                        btn.addEventListener("click", () => {
-                                                                clearInterval(timer);
-        
-                                                                for(let i = 0; i < game_message.hand.length; i++) {
-                                                                        const btn = document.getElementById('btn_game_card' + i);
-                                                                        btn.disabled = true;
-                                                                }
-        
-                                                                // 카드의 고유번호만 이용하도록 변경
-                                                                p_game_my.innerHTML = '나의 선택: ' + game_message.hand[i].suit + ' ' + game_message.hand[i].number;
-        
-                                                                game_btns.splice(game_btns.findIndex(btn => btn.id == 'btn_game_card' + i), 1);
-                                                                div_game_playground.removeChild(btn);
-        
-                                                                ws.send(JSON.stringify({
-                                                                        type: 'game_select',
-                                                                        card: game_message.hand[i]
-                                                                }));
-                                                        });
-        
-                                                        game_btns.push(btn);
-        
-                                                        div_game_playground.appendChild(btn);
-                                                }
-                                        
-                                                p_waiting.style.display = 'none';
-                                                div_game.style.display = 'block';
+                                                p_waiting.innerHTML = '잠시 후 게임이 시작됩니다.<br><br>' + (--wait);
 
-                                                timer = setInterval(() => {
-                                                        p_game_timer.innerHTML = '남은 시간: ' + (--game_time_limit) + '초';
-                                                        
-                                                        if(game_time_limit <= 0)
-                                                                game_btns[Math.floor(Math.random() * game_btns.length)].click();
-                                                }, 1000);
+                                                if(wait <= 0) {
+                                                        clearInterval(timer)
+
+                                                        show_hand(game_message.hand);
+                                                
+                                                        p_waiting.style.display = 'none';
+                                                        div_game.style.display = 'block';
+
+                                                        timer = setInterval(() => {
+                                                                p_game_timer.innerHTML = '남은 시간: ' + (--game_time_limit) + '초';
+                                                                
+                                                                if(game_time_limit <= 0)
+                                                                        game_btns[Math.floor(Math.random() * game_btns.length)].click();
+                                                        }, 1000);
+                                                }
                                         }, 1000);
 
                                 } else {
-                                        // 서버에서 핸드를 다시 받아 버튼 재설정
+                                        for(const btn of game_btns)
+                                                div_game_playground.removeChild(btn);
+                                        game_btns = [];
+
+                                        show_hand(game_message.hand);
+
                                         timer = setInterval(() => {
                                                 p_game_timer.innerHTML = '남은 시간: ' + (--game_time_limit) + '초';
                                                 
@@ -271,8 +250,10 @@ function connect_server()
                                 }
 
                                 timer = setTimeout(() => {
-                                        // 다음 턴
-                                }, 3000);
+                                        ws.send(JSON.stringify({
+                                                type: 'next'
+                                        }));
+                                }, WAITING_TIME * 1000);
 
                                 break;
                         default:
@@ -281,4 +262,35 @@ function connect_server()
         };
 }
 
-// 카드 고유번호로 카드 객체를 찾는 함수 추가
+function show_hand(hand)
+{
+        for(let i = 0; i < hand.length; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = hand[i].suit + ' ' + hand[i].number;
+                btn.style.width = '75px';
+                btn.style.height = '75px';
+                btn.style.marginRight = '5px';
+                btn.id = 'btn_game_card' + i;
+
+                btn.addEventListener("click", () => {
+                        clearInterval(timer);
+
+                        for(const card of game_btns)
+                                card.disabled = true;
+
+                        p_game_my.innerHTML = '나의 선택: ' + hand[i].suit + ' ' + hand[i].number;
+
+                        game_btns.splice(game_btns.findIndex(btn => btn.id == 'btn_game_card' + i), 1);
+                        div_game_playground.removeChild(btn);
+
+                        ws.send(JSON.stringify({
+                                type: 'game_select',
+                                card: hand[i]
+                        }));
+                });
+
+                game_btns.push(btn);
+
+                div_game_playground.appendChild(btn);
+        }
+}
