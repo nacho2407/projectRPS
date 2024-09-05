@@ -143,7 +143,7 @@ function connect_server()
                         
                                                                         ws.send(JSON.stringify({
                                                                                 type: 'pool_select',
-                                                                                card: pool_message.pool[i]
+                                                                                card: pool_message.pool[i].eigen
                                                                         }));
                                                                 });
                 
@@ -213,6 +213,7 @@ function connect_server()
                                         }, 1000);
 
                                 } else {
+                                        // 테스트 필요
                                         for(const btn of game_btns)
                                                 div_game_playground.removeChild(btn);
                                         game_btns = [];
@@ -285,7 +286,7 @@ function show_hand(hand)
 
                         ws.send(JSON.stringify({
                                 type: 'game_select',
-                                card: hand[i]
+                                card: hand[i].eigen
                         }));
                 });
 
