@@ -5,16 +5,18 @@
                 <title>projectRPS - Game</title>
 
                 <meta charset="UTF-8">
+
+                <link rel="stylesheet" type="text/css" href="style.css">
         </head>
         
         <body>
+                <p id="p_forfeited" style="display: none;">상대방이 게임을 떠났습니다.</p>
+
                 <div id="div_pair">
                         <p id="p_pair">서버 접속 중...</p>
 
                         <button id="btn_pair" style="display: none;">게임 준비</button>
                 </div>
-
-                <!-- 이하 모든 요소들을 동적으로 추가하도록 바꾸기 -->
 
                 <p id="p_waiting" style="display: none;">잠시 후 게임이 시작됩니다.<br><br>0</p>
 
@@ -44,32 +46,6 @@
                                 
                                 <p id="p_game_lose">패: 0</p>
                         <div>
-                </div>
-
-                <div id="div_final" style="display: none;">
-                        <p>게임 종료!</p>
-
-                        <p id="p_final">최종 결과</p>
-
-                        <table>
-                                <tr id="tr_final_turn">
-                                        <th>턴</th>
-                                </tr>
-
-                                <tr id="tr_final_my">
-                                        <th>내 선택</th>
-                                </tr>
-
-                                <tr id="tr_final_result">
-                                        <th>결과</th>
-                                </tr>
-
-                                <tr id="tr_final_opponent">
-                                        <th>상대 선택</th>
-                                </tr>
-                        </table>
-
-                        <button id="btn_final">다시하기</button>
                 </div>
 
                 <script src="game.js"></script>
