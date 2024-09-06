@@ -7,14 +7,12 @@ const NETWORK_TIMEOUT = 10000;
 const WAITING_TIME = 3;
 
 const btn_pair = document.getElementById('btn_pair');
-const btn_final = document.getElementById('btn_final');
 
 const div_pair = document.getElementById('div_pair');
 const div_selecting = document.getElementById('div_selecting');
 const div_selecting_pool = document.getElementById('div_selecting_pool');
 const div_game = document.getElementById('div_game');
 const div_game_playground = document.getElementById('div_game_playground');
-const div_final = document.getElementById('div_final');
 
 const p_pair = document.getElementById('p_pair');
 const p_waiting = document.getElementById('p_waiting');
@@ -27,12 +25,6 @@ const p_game_my = document.getElementById('p_game_my');
 const p_game_turn = document.getElementById('p_game_turn');
 const p_game_win = document.getElementById('p_game_win');
 const p_game_lose = document.getElementById('p_game_lose');
-const p_final = document.getElementById('p_final');
-
-const tr_final_turn = document.getElementById('tr_final_turn');
-const tr_final_my = document.getElementById('tr_final_my');
-const tr_final_result = document.getElementById('tr_final_result');
-const tr_final_opponent = document.getElementById('tr_final_opponent');
 
 let ws;
 
@@ -124,66 +116,14 @@ function connect_server()
                                                 if(wait <= 0) {
                                                         clearInterval(timer);
 
-                                                        for(let i = 0; i < pool_message.pool.length; i++) {
-                                                                const btn = document.createElement('button');
-                                                                btn.textContent = pool_message.pool[i].suit + ' ' + pool_message.pool[i].number;
-                                                                btn.style.width = '75px';
-                                                                btn.style.height = '75px';
-                                                                btn.style.marginRight = '5px';
-                                                                btn.id = 'btn_selecting' + i;
-                
-                                                                btn.addEventListener("click", () => {
-                                                                        clearInterval(timer);
-                
-                                                                        for(let i = 0; i < pool_message.pool.length; i++) {
-                                                                                const btn = document.getElementById('btn_selecting' + i);
-                                                                                btn.disabled = true;
-                                                                        }
-                        
-                                                                        if(pool_message.cur_turn >= pool_message.max_turn) {
-                                                                                p_selecting.innerHTML = '상대의 선택을 기다리는 중...';
-                                                                                p_selecting_hand.innerHTML = '나의 선택: { ' + pool_message.hand.map(card => `${card.suit} ${card.number}`).join(', ') + ', ' + pool_message.pool[i].suit + ' ' + pool_message.pool[i].number + ' }';
-                                                                                div_selecting_pool.style.display = 'none';
-                                                                        } else {
-                                                                                p_selecting.innerHTML = '로딩중...';
-                                                                                p_selecting_timer.innerHTML = '남은 시간: 0초';
-                                                                        }
-                        
-                                                                        ws.send(JSON.stringify({
-                                                                                type: 'pool_select',
-                                                                                card: pool_message.pool[i].eigen
-                                                                        }));
-                                                                });
-                
-                                                                selecting_btns.push(btn);
-                
-                                                                div_selecting_pool.appendChild(btn);
-                                                        }
+                                                        show_pool(pool_message.pool, selecting_time_limit);
                                         
                                                         p_waiting.style.display = 'none';
                                                         div_selecting.style.display = 'block';
-
-                                                        timer = setInterval(() => {
-                                                                p_selecting_timer.innerHTML = '남은 시간: ' + (--selecting_time_limit) + '초';
-                        
-                                                                if(selecting_time_limit <= 0)
-                                                                        selecting_btns[Math.floor(Math.random() * selecting_btns.length)].click();
-                                                        }, 1000);
                                                 }
                                         }, 1000);
                                 } else {
-                                        for(let i = 0; i < pool_message.pool.length; i++) {
-                                                const btn = document.getElementById('btn_selecting' + i);
-                                                btn.textContent = pool_message.pool[i].suit + ' ' + pool_message.pool[i].number;
-                                                btn.disabled = false;
-                                        }
-                                        
-                                        timer = setInterval(() => {
-                                                p_selecting_timer.innerHTML = '남은 시간: ' + (--selecting_time_limit) + '초';
-        
-                                                if(selecting_time_limit <= 0)
-                                                        selecting_btns[Math.floor(Math.random() * selecting_btns.length)].click();
-                                        }, 1000);
+                                        show_pool(pool_message.pool, selecting_time_limit);
                                 }
 
                                 p_selecting_hand.innerHTML = '나의 선택: { ' + pool_message.hand.map(card => `${card.suit} ${card.number}`).join(', ') + ' }';
@@ -200,6 +140,7 @@ function connect_server()
                                         p_waiting.innerHTML = '잠시 후 게임이 시작됩니다.<br><br>' + wait;
 
                                         div_selecting.style.display = 'none';
+                                        div_selecting_pool.style.display = 'block';
                                         p_waiting.style.display = 'block';
 
                                         timer = setInterval(() => {
@@ -253,8 +194,49 @@ function connect_server()
                                 break;
                         case 'final':
                                 final_message = json_message;
+                                
+                                div_game.style.display = 'none';
+                                
+                                /* It won't show up if you just write it at the end of the HTML.
+                                   Probably due to the style of div_game. */
+                                const div_final = document.createElement('div');
+                                div_final.id = 'div_final';
+                                div_final.style.display = 'none';
+                                div_final.innerHTML = '<p>게임 종료!</p>\
+                                        <p id="p_final">최종 결과</p>\
+                                        <table style="text-align: center;">\
+                                                <tr id="tr_final_turn">\
+                                                        <th>턴</th>\
+                                                </tr>\
+                                                <tr id="tr_final_my">\
+                                                        <th>내 선택</th>\
+                                                </tr>\
+                                                <tr id="tr_final_result">\
+                                                        <th>결과</th>\
+                                                </tr>\
+                                                <tr id="tr_final_opponent">\
+                                                        <th>상대 선택</th>\
+                                                </tr>\
+                                        </table>\
+                                        <br>\
+                                        <button id="btn_final">다시하기</button>';
+
+                                document.body.appendChild(div_final);
+
+                                const btn_final = document.getElementById('btn_final');
+                                const p_final = document.getElementById('p_final');
+                                const tr_final_turn = document.getElementById('tr_final_turn');
+                                const tr_final_my = document.getElementById('tr_final_my');
+                                const tr_final_result = document.getElementById('tr_final_result');
+                                const tr_final_opponent = document.getElementById('tr_final_opponent');
 
                                 p_final.innerHTML = '최종 결과 - ' + final_message.final;
+
+                                for(let i = 1; i <= final_message.log.length; i++) {
+                                        const td = document.createElement('td');
+                                        td.textContent = i;
+                                        tr_final_turn.appendChild(td);
+                                }
 
                                 for(const card of final_message.log) {
                                         const td = document.createElement('td');
@@ -262,10 +244,10 @@ function connect_server()
                                         tr_final_my.appendChild(td);
                                 }
 
-                                for(let i = 1; i <= final_message.log.length; i++) {
+                                for(const result of final_message.results) {
                                         const td = document.createElement('td');
-                                        td.textContent = i;
-                                        tr_final_turn.appendChild(td);
+                                        td.textContent = result;
+                                        tr_final_result.appendChild(td);
                                 }
 
                                 for(const card of final_message.opponent_log) {
@@ -274,14 +256,88 @@ function connect_server()
                                         tr_final_opponent.appendChild(td);
                                 }
 
-                                div_game.style.display = 'none';
+                                btn_final.addEventListener('click', () => {
+                                        document.body.removeChild(div_final);
+
+                                        p_pair.innerHTML = '상대를 찾는 중...';
+                                        btn_pair.textContent = '게임 준비';
+                                        btn_pair.style.display = 'none';
+
+                                        is_ready = false;
+
+                                        div_pair.style.display = 'block';
+
+                                        ws.send(JSON.stringify({
+                                                type: 'again'
+                                        }));
+                                });
+
                                 div_final.style.display = 'block';
+
+                                break;
+                        case 'leave':
+                                // TODO: 게임 시작 전 상대가 떠난 경우
+
+                                break;
+                        case 'forfeiture':
+                                // TODO: 게임 시작 후 상대가 떠난 경우
+                                // TODO: div_final에 몰수승 표시
 
                                 break;
                         default:
                                 console.log('Unknown message type: ' + json_message.type);
                 };
         };
+}
+
+function show_pool(pool, time_limit)
+{
+        for(const btn of selecting_btns)
+                div_selecting_pool.removeChild(btn);
+        selecting_btns = [];
+
+        for(let i = 0; i < pool_message.pool.length; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = pool[i].suit + ' ' + pool[i].number;
+                btn.style.width = '75px';
+                btn.style.height = '75px';
+                btn.style.marginRight = '5px';
+                btn.id = 'btn_selecting' + i;
+
+                btn.addEventListener("click", () => {
+                        clearInterval(timer);
+
+                        for(let i = 0; i < pool.length; i++) {
+                                const btn = document.getElementById('btn_selecting' + i);
+                                btn.disabled = true;
+                        }
+
+                        if(pool_message.cur_turn >= pool_message.max_turn) {
+                                p_selecting.innerHTML = '상대의 선택을 기다리는 중...';
+                                p_selecting_hand.innerHTML = '나의 선택: { ' + pool_message.hand.map(card => `${card.suit} ${card.number}`).join(', ') + ', ' + pool[i].suit + ' ' + pool[i].number + ' }';
+                                div_selecting_pool.style.display = 'none';
+                        } else {
+                                p_selecting.innerHTML = '로딩중...';
+                                p_selecting_timer.innerHTML = '남은 시간: 0초';
+                        }
+
+                        ws.send(JSON.stringify({
+                                type: 'pool_select',
+                                card: pool[i].eigen
+                        }));
+                });
+
+                selecting_btns.push(btn);
+
+                div_selecting_pool.appendChild(btn);
+        }
+
+        timer = setInterval(() => {
+                p_selecting_timer.innerHTML = '남은 시간: ' + (--time_limit) + '초';
+
+                if(time_limit <= 0)
+                        selecting_btns[Math.floor(Math.random() * selecting_btns.length)].click();
+        }, 1000);
 }
 
 function show_hand(hand, time_limit)
