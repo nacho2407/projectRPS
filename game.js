@@ -7,12 +7,14 @@ const NETWORK_TIMEOUT = 10000;
 const WAITING_TIME = 3;
 
 const btn_pair = document.getElementById('btn_pair');
+const btn_final = document.getElementById('btn_final');
 
 const div_pair = document.getElementById('div_pair');
 const div_selecting = document.getElementById('div_selecting');
 const div_selecting_pool = document.getElementById('div_selecting_pool');
 const div_game = document.getElementById('div_game');
 const div_game_playground = document.getElementById('div_game_playground');
+const div_final = document.getElementById('div_final');
 
 const p_pair = document.getElementById('p_pair');
 const p_waiting = document.getElementById('p_waiting');
@@ -25,6 +27,12 @@ const p_game_my = document.getElementById('p_game_my');
 const p_game_turn = document.getElementById('p_game_turn');
 const p_game_win = document.getElementById('p_game_win');
 const p_game_lose = document.getElementById('p_game_lose');
+const p_final = document.getElementById('p_final');
+
+const tr_final_turn = document.getElementById('tr_final_turn');
+const tr_final_my = document.getElementById('tr_final_my');
+const tr_final_result = document.getElementById('tr_final_result');
+const tr_final_opponent = document.getElementById('tr_final_opponent');
 
 let ws;
 
@@ -190,42 +198,28 @@ function connect_server()
                                 if(game_message.cur_turn == 1) {
                                         let wait = WAITING_TIME
                                         p_waiting.innerHTML = '잠시 후 게임이 시작됩니다.<br><br>' + wait;
+
                                         div_selecting.style.display = 'none';
                                         p_waiting.style.display = 'block';
+
                                         timer = setInterval(() => {
                                                 p_waiting.innerHTML = '잠시 후 게임이 시작됩니다.<br><br>' + (--wait);
 
                                                 if(wait <= 0) {
                                                         clearInterval(timer)
 
-                                                        show_hand(game_message.hand);
+                                                        show_hand(game_message.hand, game_time_limit);
                                                 
                                                         p_waiting.style.display = 'none';
                                                         div_game.style.display = 'block';
-
-                                                        timer = setInterval(() => {
-                                                                p_game_timer.innerHTML = '남은 시간: ' + (--game_time_limit) + '초';
-                                                                
-                                                                if(game_time_limit <= 0)
-                                                                        game_btns[Math.floor(Math.random() * game_btns.length)].click();
-                                                        }, 1000);
                                                 }
                                         }, 1000);
 
                                 } else {
-                                        // 테스트 필요
-                                        for(const btn of game_btns)
-                                                div_game_playground.removeChild(btn);
-                                        game_btns = [];
+                                        p_game_opponent.innerHTML = '상대 선택 중...';
+                                        p_game_my.innerHTML = '나의 선택';
 
-                                        show_hand(game_message.hand);
-
-                                        timer = setInterval(() => {
-                                                p_game_timer.innerHTML = '남은 시간: ' + (--game_time_limit) + '초';
-                                                
-                                                if(game_time_limit <= 0)
-                                                        game_btns[Math.floor(Math.random() * game_btns.length)].click();
-                                        }, 1000);
+                                        show_hand(game_message.hand, game_time_limit);
                                 }
 
                                 p_game_turn.innerHTML = '턴: ' + game_message.cur_turn + '/' + game_message.max_turn;
@@ -257,14 +251,45 @@ function connect_server()
                                 }, WAITING_TIME * 1000);
 
                                 break;
+                        case 'final':
+                                final_message = json_message;
+
+                                p_final.innerHTML = '최종 결과 - ' + final_message.final;
+
+                                for(const card of final_message.log) {
+                                        const td = document.createElement('td');
+                                        td.textContent = card.suit + ' ' + card.number;
+                                        tr_final_my.appendChild(td);
+                                }
+
+                                for(let i = 1; i <= final_message.log.length; i++) {
+                                        const td = document.createElement('td');
+                                        td.textContent = i;
+                                        tr_final_turn.appendChild(td);
+                                }
+
+                                for(const card of final_message.opponent_log) {
+                                        const td = document.createElement('td');
+                                        td.textContent = card.suit + ' ' + card.number;
+                                        tr_final_opponent.appendChild(td);
+                                }
+
+                                div_game.style.display = 'none';
+                                div_final.style.display = 'block';
+
+                                break;
                         default:
                                 console.log('Unknown message type: ' + json_message.type);
                 };
         };
 }
 
-function show_hand(hand)
+function show_hand(hand, time_limit)
 {
+        for(const btn of game_btns)
+                div_game_playground.removeChild(btn);
+        game_btns = [];
+
         for(let i = 0; i < hand.length; i++) {
                 const btn = document.createElement('button');
                 btn.textContent = hand[i].suit + ' ' + hand[i].number;
@@ -294,4 +319,11 @@ function show_hand(hand)
 
                 div_game_playground.appendChild(btn);
         }
+
+        timer = setInterval(() => {
+                p_game_timer.innerHTML = '남은 시간: ' + (--time_limit) + '초';
+                
+                if(time_limit <= 0)
+                        game_btns[Math.floor(Math.random() * game_btns.length)].click();
+        }, 1000);
 }
