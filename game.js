@@ -14,6 +14,7 @@ const div_selecting_pool = document.getElementById('div_selecting_pool');
 const div_game = document.getElementById('div_game');
 const div_game_playground = document.getElementById('div_game_playground');
 
+const p_forfeiture = document.getElementById('p_forfeiture');
 const p_pair = document.getElementById('p_pair');
 const p_waiting = document.getElementById('p_waiting');
 const p_selecting = document.getElementById('p_selecting');
@@ -275,11 +276,20 @@ function connect_server()
                                 div_final.style.display = 'block';
 
                                 break;
-                        case 'leave':
+                        case 'forfeited':
+                                p_forfeiture.innerHTML = '비정상적인 접근입니다. 다시 접속하십시오.';
+
+                                div_selecting.style.display = 'none';
+                                div_game.style.display = 'none';
+
+                                p_forfeiture.style.display = 'block';
+
+                                break;
+                        case 'opponent_leave':
                                 // TODO: 게임 시작 전 상대가 떠난 경우
 
                                 break;
-                        case 'forfeiture':
+                        case 'opponent_forfeited':
                                 // TODO: 게임 시작 후 상대가 떠난 경우
                                 // TODO: div_final에 몰수승 표시
 
