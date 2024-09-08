@@ -69,20 +69,20 @@ function connect_server()
 {
         ws = new WebSocket(SERVER_ADDR + ':' + SERVER_PORT);
 
-        const connection_timeout = setTimeout(() => {
+        timer = setTimeout(() => {
                 ws.close();
                 
                 p_pair.innerHTML = '연결 시간 초과.<br><br>다시 시도하십시오.';
         }, NETWORK_TIMEOUT);
 
         ws.onopen = () => {
-                clearTimeout(connection_timeout);
+                clearTimeout(timer);
                 
                 p_pair.innerHTML = '서버 접속 성공.<br><br>상대를 찾는 중...';
         };
 
         ws.onerror = () => {
-                clearTimeout(connection_timeout);
+                clearTimeout(timer);
 
                 p_pair.innerHTML = '서버가 응답하지 않습니다.<br><br>다시 시도하십시오.';
         };
@@ -287,6 +287,7 @@ function connect_server()
                                 break;
                         case 'opponent_leave':
                                 // TODO: 게임 시작 전 상대가 떠난 경우
+                                // TODO: timeout이랑 interval 구분해서 변수 사용 및 clear
 
                                 break;
                         case 'opponent_forfeited':
