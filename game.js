@@ -31,9 +31,10 @@ let ws;
 
 let is_ready = false;
 
-let timer;
+let interval;
 let selecting_btns = [];
 let game_btns = [];
+let timer;
 
 let json_message;
 let match_message;
@@ -111,11 +112,11 @@ function connect_server()
                                         p_waiting.innerHTML = '잠시 후 게임이 시작됩니다.<br><br>' + WAITING_TIME;
                                         div_pair.style.display = 'none';
                                         p_waiting.style.display = 'block';
-                                        timer = setInterval(() => {
+                                        interval = setInterval(() => {
                                                 p_waiting.innerHTML = '잠시 후 게임이 시작됩니다.<br><br>' + (--wait);
 
                                                 if(wait <= 0) {
-                                                        clearInterval(timer);
+                                                        clearInterval(interval);
 
                                                         show_pool(pool_message.pool, selecting_time_limit);
                                         
@@ -144,11 +145,11 @@ function connect_server()
                                         div_selecting_pool.style.display = 'block';
                                         p_waiting.style.display = 'block';
 
-                                        timer = setInterval(() => {
+                                        interval = setInterval(() => {
                                                 p_waiting.innerHTML = '잠시 후 게임이 시작됩니다.<br><br>' + (--wait);
 
                                                 if(wait <= 0) {
-                                                        clearInterval(timer)
+                                                        clearInterval(interval)
 
                                                         show_hand(game_message.hand, game_time_limit);
                                                 
@@ -287,7 +288,10 @@ function connect_server()
                                 break;
                         case 'opponent_leave':
                                 // TODO: 게임 시작 전 상대가 떠난 경우
-                                // TODO: timeout이랑 interval 구분해서 변수 사용 및 clear
+                                clearInterval(interval);
+                                clearTimeout(timer);
+
+                                
 
                                 break;
                         case 'opponent_forfeited':
@@ -316,7 +320,7 @@ function show_pool(pool, time_limit)
                 btn.id = 'btn_selecting' + i;
 
                 btn.addEventListener("click", () => {
-                        clearInterval(timer);
+                        clearInterval(interval);
 
                         for(let i = 0; i < pool.length; i++) {
                                 const btn = document.getElementById('btn_selecting' + i);
@@ -343,7 +347,7 @@ function show_pool(pool, time_limit)
                 div_selecting_pool.appendChild(btn);
         }
 
-        timer = setInterval(() => {
+        interval = setInterval(() => {
                 p_selecting_timer.innerHTML = '남은 시간: ' + (--time_limit) + '초';
 
                 if(time_limit <= 0)
@@ -366,7 +370,7 @@ function show_hand(hand, time_limit)
                 btn.id = 'btn_game_card' + i;
 
                 btn.addEventListener("click", () => {
-                        clearInterval(timer);
+                        clearInterval(interval);
 
                         for(const card of game_btns)
                                 card.disabled = true;
@@ -387,7 +391,7 @@ function show_hand(hand, time_limit)
                 div_game_playground.appendChild(btn);
         }
 
-        timer = setInterval(() => {
+        interval = setInterval(() => {
                 p_game_timer.innerHTML = '남은 시간: ' + (--time_limit) + '초';
                 
                 if(time_limit <= 0)
