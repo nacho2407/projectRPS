@@ -1,6 +1,6 @@
-const VERSION = "0.0.1"
+const VERSION = "0.1.0"
 
-const SERVER_ADDR = 'ws://localhost';
+const SERVER_ADDR = 'ws://jmj0ok.iptime.org';
 const SERVER_PORT = 8080;
 
 const NETWORK_TIMEOUT = 10000;
@@ -42,11 +42,6 @@ let result_message;
 
 let div_final;
 let btn_final;
-let p_final;
-let tr_final_turn;
-let tr_final_my;
-let tr_final_result;
-let tr_final_opponent;
 
 let is_ready = false;
 
@@ -108,6 +103,8 @@ function connect_server()
 
                                 break;
                         case 'pool':
+                                p_forfeiture.style.display = 'none';
+
                                 pool_message = json_message;
 
                                 p_selecting.innerHTML = '개수: ' + pool_message.cur_turn + '/' + pool_message.max_turn;
@@ -234,11 +231,12 @@ function connect_server()
                                 document.body.appendChild(div_final);
 
                                 btn_final = document.getElementById('btn_final');
-                                p_final = document.getElementById('p_final');
-                                tr_final_turn = document.getElementById('tr_final_turn');
-                                tr_final_my = document.getElementById('tr_final_my');
-                                tr_final_result = document.getElementById('tr_final_result');
-                                tr_final_opponent = document.getElementById('tr_final_opponent');
+                                
+                                const p_final = document.getElementById('p_final');
+                                const tr_final_turn = document.getElementById('tr_final_turn');
+                                const tr_final_my = document.getElementById('tr_final_my');
+                                const tr_final_result = document.getElementById('tr_final_result');
+                                const tr_final_opponent = document.getElementById('tr_final_opponent');
 
                                 p_final.innerHTML = '최종 결과 - ' + final_message.final;
 
@@ -299,9 +297,16 @@ function connect_server()
                                 clearTimeout(timer);
 
                                 div_pair.style.display = 'none';
+                                p_waiting.style.display = 'none';
                                 div_selecting.style.display = 'none';
 
-                                p_pair.innerHTML = '상대가 떠났습니다.<br><br>상대를 찾는 중...';
+                                p_pair.innerHTML = '상대를 찾는 중...';
+                                btn_pair.textContent = '게임 준비';
+                                btn_pair.style.display = 'none';
+
+                                is_ready = false;
+
+                                p_forfeiture.style.display = 'block';
                                 div_pair.style.display = 'block';
 
                                 ws.send(JSON.stringify({
@@ -313,18 +318,20 @@ function connect_server()
                                 clearInterval(interval);
                                 clearTimeout(timer);
                                 
-                                // TODO: div_game 숨기기 + 아래 내용 수정
+                                p_waiting.style.display = 'none';
+                                div_game.style.display = 'none';
+
                                 div_final = document.createElement('div');
                                 div_final.id = 'div_final';
                                 div_final.style.display = 'none';
-                                div_final.innerHTML = '<p>게임 종료!</p>\
-                                        <p id="p_final">최종 결과</p>\
+                                div_final.innerHTML = '<p>상대방이 게임을 떠났습니다.</p>\
+                                        <p id="p_final">최종 결과: 승리!</p>\
                                         <br>\
                                         <button id="btn_final">다시하기</button>';
 
                                 document.body.appendChild(div_final);
 
-                                const btn_final = document.getElementById('btn_final');
+                                btn_final = document.getElementById('btn_final');
 
                                 btn_final.addEventListener('click', () => {
                                         document.body.removeChild(div_final);
