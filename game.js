@@ -29,8 +29,6 @@ const p_game_lose = document.getElementById('p_game_lose');
 
 let ws;
 
-let is_ready = false;
-
 let interval;
 let selecting_btns = [];
 let game_btns = [];
@@ -41,6 +39,16 @@ let match_message;
 let pool_message;
 let game_message;
 let result_message;
+
+let div_final;
+let btn_final;
+let p_final;
+let tr_final_turn;
+let tr_final_my;
+let tr_final_result;
+let tr_final_opponent;
+
+let is_ready = false;
 
 document.addEventListener('DOMContentLoaded', () => {
         btn_pair.addEventListener('click', () => {
@@ -201,7 +209,7 @@ function connect_server()
                                 
                                 /* It won't show up if you just write it at the end of the HTML.
                                    Probably due to the style of div_game. */
-                                const div_final = document.createElement('div');
+                                div_final = document.createElement('div');
                                 div_final.id = 'div_final';
                                 div_final.style.display = 'none';
                                 div_final.innerHTML = '<p>게임 종료!</p>\
@@ -225,12 +233,12 @@ function connect_server()
 
                                 document.body.appendChild(div_final);
 
-                                const btn_final = document.getElementById('btn_final');
-                                const p_final = document.getElementById('p_final');
-                                const tr_final_turn = document.getElementById('tr_final_turn');
-                                const tr_final_my = document.getElementById('tr_final_my');
-                                const tr_final_result = document.getElementById('tr_final_result');
-                                const tr_final_opponent = document.getElementById('tr_final_opponent');
+                                btn_final = document.getElementById('btn_final');
+                                p_final = document.getElementById('p_final');
+                                tr_final_turn = document.getElementById('tr_final_turn');
+                                tr_final_my = document.getElementById('tr_final_my');
+                                tr_final_result = document.getElementById('tr_final_result');
+                                tr_final_opponent = document.getElementById('tr_final_opponent');
 
                                 p_final.innerHTML = '최종 결과 - ' + final_message.final;
 
@@ -287,16 +295,54 @@ function connect_server()
 
                                 break;
                         case 'opponent_leave':
-                                // TODO: 게임 시작 전 상대가 떠난 경우
                                 clearInterval(interval);
                                 clearTimeout(timer);
 
-                                
+                                div_pair.style.display = 'none';
+                                div_selecting.style.display = 'none';
+
+                                p_pair.innerHTML = '상대가 떠났습니다.<br><br>상대를 찾는 중...';
+                                div_pair.style.display = 'block';
+
+                                ws.send(JSON.stringify({
+                                        type: 'again'
+                                }));
 
                                 break;
                         case 'opponent_forfeited':
-                                // TODO: 게임 시작 후 상대가 떠난 경우
-                                // TODO: div_final에 몰수승 표시
+                                clearInterval(interval);
+                                clearTimeout(timer);
+                                
+                                // TODO: 아래 내용 수정
+                                div_final = document.createElement('div');
+                                div_final.id = 'div_final';
+                                div_final.style.display = 'none';
+                                div_final.innerHTML = '<p>게임 종료!</p>\
+                                        <p id="p_final">최종 결과</p>\
+                                        <br>\
+                                        <button id="btn_final">다시하기</button>';
+
+                                document.body.appendChild(div_final);
+
+                                const btn_final = document.getElementById('btn_final');
+
+                                btn_final.addEventListener('click', () => {
+                                        document.body.removeChild(div_final);
+
+                                        p_pair.innerHTML = '상대를 찾는 중...';
+                                        btn_pair.textContent = '게임 준비';
+                                        btn_pair.style.display = 'none';
+
+                                        is_ready = false;
+
+                                        div_pair.style.display = 'block';
+
+                                        ws.send(JSON.stringify({
+                                                type: 'again'
+                                        }));
+                                });
+
+                                div_final.style.display = 'block';
 
                                 break;
                         default:
