@@ -313,7 +313,7 @@ function connect_server()
                                 clearInterval(interval);
                                 clearTimeout(timer);
                                 
-                                // TODO: 아래 내용 수정
+                                // TODO: div_game 숨기기 + 아래 내용 수정
                                 div_final = document.createElement('div');
                                 div_final.id = 'div_final';
                                 div_final.style.display = 'none';
