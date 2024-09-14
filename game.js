@@ -1,6 +1,6 @@
 const VERSION = "0.1.0"
 
-const SERVER_ADDR = 'wss://jmj0ok.iptime.org';
+const SERVER_ADDR = 'wss://nacho2407.duckdns.org';
 const SERVER_PORT = 8080;
 
 const NETWORK_TIMEOUT = 10000;
